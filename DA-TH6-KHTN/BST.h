@@ -25,6 +25,8 @@ Tree &ArrayToBST(int[], int);
 void addNode(Tree &, unsigned);
 Node* &findNode(Tree &, unsigned);
 void deleteNode(Tree &, unsigned);
+void deleteNode(Tree &);
+Node *searchStandFor(Tree &, Tree&);
 Node* findMinimum(Tree);
 unsigned countNode(Tree);
 unsigned countSubTree(Tree);
@@ -36,7 +38,6 @@ void RNL(Tree);
 void RLN(Tree);
 void NRL(Tree);
 void NLR(Tree);
-
 
 inline void treeInit(Tree &tr)
 {
@@ -90,37 +91,59 @@ inline Node*& findNode(Tree &tr, unsigned x)
 	}
 }
 
-inline void deleteNoteLessThan2Children(Node*& node, Node *successor)
+inline void deleteNode(Tree & tr, unsigned x)
 {
-	Node* temp = node;
-	if (successor)
-	{
-		node = successor;
-		delete temp;
-	}
-	else
-	{
-		delete temp;
-		node = NULL;
-	}
-}
-inline void deleteNodeWith2Children(Node*& node, Node *successor)
-{
-	
-	node->info = successor->info;
-	deleteNode(node->right, successor->info);
-}
-inline void deleteNode(Tree &tr, unsigned x)
-{
-	Node *&toBeGone = findNode(tr, x);
-	if (toBeGone == NULL)
+	// tim node chua x de xoa
+	if (tr == NULL)
 		return;
-	if (!toBeGone->left)
-		deleteNoteLessThan2Children(toBeGone, toBeGone->right);
-	else if (!toBeGone->right)
-		deleteNoteLessThan2Children(toBeGone, toBeGone->left);
+	else if (x < tr->info)
+		deleteNode(tr->left, x);
+	else if (x > tr->info)
+		deleteNode(tr->right, x);
+	// tim duoc
+	else // x == tr->info
+		deleteNode(tr);
+}
+
+inline void deleteNode(Tree & tr)
+{
+	Node *temp = tr;
+	// if leaf
+	if (!tr->left && !tr->right)
+	{
+		tr = NULL;
+		delete temp;
+	}
+	// if has only right child
+	else if (!tr->left && tr->right)
+	{
+		tr = tr->right;
+		delete temp;
+	}
+	// if has only left child
+	else if (tr->left && !tr->right)
+	{
+		tr = tr->left;
+		delete temp;
+	}
+	// if both children
 	else
-		deleteNodeWith2Children(toBeGone, findMinimum(toBeGone->right));
+	{
+		temp = searchStandFor(tr->left, tr);
+		delete temp;
+	}
+}
+
+inline Node * searchStandFor(Tree &subtree, Tree &root)
+{
+	// tim rightmost ele
+	if (subtree->right)
+		return searchStandFor(subtree->right, root);
+	// found it
+	Node * temp = subtree;
+	root->info = subtree->info;
+	subtree = subtree->left;
+	return temp;
 }
 
 inline Node* findMinimum(Tree tr)
@@ -182,7 +205,6 @@ void LRN(Tree tr)
 	LRN(tr->right);
 	cout << tr->info;
 }
-
 void LNR(Tree tr)
 {
 	if (tr == NULL)
@@ -191,21 +213,35 @@ void LNR(Tree tr)
 	cout << tr->info << "  ";
 	LNR(tr->right);
 }
-
 void RNL(Tree tr)
 {
 	if (tr = NULL)
 		return;
 	LNR(tr->right);
-	cout << tr->info;
+	cout << tr->info << "  ";
 	LNR(tr->left);
 }
-
 void RLN(Tree tr)
 {
 	if (tr = NULL)
 		return;
 	LNR(tr->right);
 	LNR(tr->left);
-	cout << tr->info;
+	cout << tr->info << "  ";
+}
+void NRL(Tree tr)
+{
+	if (tr == NULL)
+		return;
+	cout << tr->info << "  ";
+	NRL(tr->right);
+	NRL(tr->left);
+}
+void NLR(Tree tr)
+{
+	if (tr == NULL)
+		return;
+	cout << tr->info << "  ";
+	NLR(tr->left);
+	NLR(tr->right);
 }
